@@ -13,3 +13,14 @@ pub struct Brain {
     pub input: Vec<NeuronId>,
     pub output: Vec<NeuronId>,
 }
+
+pub struct Coeffs {
+    pub a1: f32,
+    pub a2: f32,
+    pub a3: f32,
+    pub a4: f32,
+    pub a5: f32,
+    pub a6: f32,
+    pub a7: f32,
+    pub a8: f32,
+}
