@@ -1,40 +1,34 @@
 use crate::structs::Coeffs;
+use std::f32::consts::{E,PI,TAU,FRAC_PI_2,FRAC_PI_4,SQRT_2,SQRT_3,LN_2,LOG2_E};
 
-fn mix64(mut x: u64) -> u64 {
-    x ^= x >> 30;
-    x = x.wrapping_mul(0xbf58_476d_1ce4_e5b9);
-    x ^= x >> 27;
-    x = x.wrapping_mul(0x94d0_49bb_1331_11eb);
-    x ^ (x >> 31)
+fn wave(x: f64)->f32 {
+    ((x.sin() + 1.0) * 0.5) as f32
 }
 
-fn unit(x: u64) -> f32 {
-    ((x >> 40) as u32) as f32 / 16_777_215.0
+fn smooth(x: f32)->f32 {
+    x * x * (3.0 - 2.0 * x)
 }
 
-fn signed(x: u64) -> f32 {
-    unit(x) * 2.0 - 1.0
-}
-
-pub fn genCoeffs(seed: u64) -> Coeffs {
-    let a = mix64(seed ^ 0x243f_6a88_85a3_08d3);
-    let b = mix64(seed ^ 0x1319_8a2e_0370_7344);
-    let c = mix64(seed ^ 0xa409_3822_299f_31d0);
-    let d = mix64(seed ^ 0x082e_fa98_ec4e_6c89);
-    let e = mix64(seed ^ 0x4528_21e6_38d0_1377);
-    let f = mix64(seed ^ 0xbe54_66cf_34e9_0c6c);
-    let g = mix64(seed ^ 0xc0ac_29b7_c97c_50dd);
-    let h = mix64(seed ^ 0x3f84_d5b5_b547_0917);
+pub fn coeffs(seed:u64)->Coeffs {
+    let x = seed as f64;
+    let a = wave(x*(1.0/SQRT_2 as f64) + PI as f64);
+    let b = wave(x*(1.0/SQRT_3 as f64) + E as f64);
+    let c = wave(x*(1.0/LOG2_E as f64) + FRAC_PI_4 as f64);
+    let d = wave(x*(1.0/LN_2 as f64) + FRAC_PI_2 as f64);
+    let e = wave(x*(1.0/PI as f64) + TAU as f64);
+    let f = wave(x*(1.0/E as f64) + SQRT_2 as f64);
+    let g = wave(x*(1.0/SQRT_3 as f64) + PI as f64 + E as f64);
+    let h = wave(x*(1.0/SQRT_2 as f64) + TAU as f64 + FRAC_PI_4 as f64);
 
     Coeffs {
-        a1: unit(a),
-        a2: unit(b),
-        a3: unit(c),
-        a4: unit(d),
-        a5: unit(e),
-        a6: unit(f),
-        a7: unit(g),
-        a8: unit(h),
+        a1: smooth(a),
+        a2: smooth(b),
+        a3: smooth(c),
+        a4: smooth(d),
+        a5: smooth(e),
+        a6: smooth(f),
+        a7: smooth(g),
+        a8: smooth(h),
     }
 }
 
