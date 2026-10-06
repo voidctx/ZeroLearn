@@ -32,30 +32,33 @@ pub fn coeffs(seed:u64)->Coeffs {
     }
 }
 
-pub fn f_t(a1:f32,a4:f32,a6:f32,data:f32,temp:f32)->f32 {
-    let threshold = 0.15 + a1 * 0.70;
-    let sensitivity = 0.5 + a4 * 3.5;
-    let temperature = temp.max(0.001);
-    let x = (data - threshold) * sensitivity / temperature;
+pub fn f_t(s1:f32,s4:f32,s6:f32,data:f32,temp:f32)->f32 {
+    let threshold = (s1 + s1 * s1) / (E as f32);
+    let sensitivity = (s4 + SQRT_2 * s4 * s4) / (s6 + E.recip());
+    let thermal = temp.abs() + s6 + E.recip();
+    let x = (data - threshold) * sensitivity / thermal;
     if x >= 0.0 {
-        let e = (-x).exp();
-        (1.0 + e * (1.0 + a6 * 0.05)).recip()
+        let q = (-x).exp();
+        (q + 1.0).recip()
     } else {
-        let e = x.exp();
-        (e * (1.0 + a6 * 0.05)) / (1.0 + e * (1.0 + a6 * 0.05))
+        let q = x.exp();
+        q / (q + 1.0)
     }
 }
 
 pub fn f_d(s2:f32,s7:f32)->f32 {
-    0.01 + 0.49 * (s2 * s2 * 0.65 + s7 * 0.35)
+    let x = s2 * s2 + s7 * s7;
+    (-x / E).exp()
 }
 
 pub fn f_n(s3:f32,s5:f32)->f32 {
-    0.0005 + 0.08 * (s3 * s3 * 0.7 + s5 * 0.3)
+    let magnitude = (s3 * s3 + s5 * s5).sqrt();
+    magnitude / SQRT_2
 }
 
 pub fn f_r(s2:f32,s8:f32,t3:f32,t7:f32)->f32 {
-    let source = 0.35 + 1.65 * (s2 * 0.65 + s8 * 0.35);
-    let target = 0.35 + 1.65 * (t3 * 0.55 + t7 * 0.45);
-    source * target
+    let ds = s2 - t3;
+    let dt = s8 - t7;
+    let distance = (ds * ds + dt * dt).sqrt();
+    (distance * E).exp()
 }
