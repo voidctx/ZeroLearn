@@ -37,3 +37,31 @@ pub fn genCoeffs(seed: u64) -> Coeffs {
         a8: unit(h),
     }
 }
+
+pub fn f_t(a1:f32,a4:f32,a6:f32,data:f32,temp:f32)->f32 {
+    let threshold = 0.15 + a1 * 0.70;
+    let sensitivity = 0.5 + a4 * 3.5;
+    let temperature = temp.max(0.001);
+    let x = (data - threshold) * sensitivity / temperature;
+    if x >= 0.0 {
+        let e = (-x).exp();
+        (1.0 + e * (1.0 + a6 * 0.05)).recip()
+    } else {
+        let e = x.exp();
+        (e * (1.0 + a6 * 0.05)) / (1.0 + e * (1.0 + a6 * 0.05))
+    }
+}
+
+pub fn f_d(s2:f32,s7:f32)->f32 {
+    0.01 + 0.49 * (s2 * s2 * 0.65 + s7 * 0.35)
+}
+
+pub fn f_n(s3:f32,s5:f32)->f32 {
+    0.0005 + 0.08 * (s3 * s3 * 0.7 + s5 * 0.3)
+}
+
+pub fn f_r(s2:f32,s8:f32,t3:f32,t7:f32)->f32 {
+    let source = 0.35 + 1.65 * (s2 * 0.65 + s8 * 0.35);
+    let target = 0.35 + 1.65 * (t3 * 0.55 + t7 * 0.45);
+    source * target
+}
